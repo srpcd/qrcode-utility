@@ -18,7 +18,7 @@ def about_window(master, icon, *args, **kwargs):
 
 class AboutWindow(tk.Toplevel):
     """
-    QRCode Utility - srpcdux
+    QRCode Utility - srpcd
     Version v1.00
     
     Barcode Scanner: {bar_name}
@@ -41,7 +41,7 @@ class AboutWindow(tk.Toplevel):
                              bg='#151515', padx=125, pady=10)
         self.explanation = tk.Label(self.frame, font=("Calibri", 11), fg='white', bg='#222222', justify=tk.LEFT,
                                     text=self.__doc__.format(bar_name="OpenCV 2.0" if use_cv2 else "Pyzbar"))
-        self.url = "https://github.com/srpcdux/qrcode-utility"
+        self.url = "https://github.com/srpcd/qrcode-utility"
         self.github_btn = tk.Button(self.frame, text='Github', padx=9, pady=3, bg='black',
                                     fg='white', activebackground='#353535', activeforeground='white', relief=tk.SUNKEN,
                                     bd=0, command=lambda: webbrowser.open(self.url))
