@@ -8,7 +8,7 @@ title Building...
 
 timeout /t 2 /NOBREAK >nul
 
-python --version 2>&1 | findstr /C:" 3.11" >nul
+python --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo Python 3.11 is not installed or not in path.
     color 0c
@@ -41,7 +41,7 @@ if %errorlevel% equ 2 (
     exit /b
 )
 
-py -3.11 builder.py
+python builder.py
 
 echo.
 pause
