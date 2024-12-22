@@ -1,26 +1,40 @@
 import os
+import sys
+import stat
 import shutil
 import requests
 import subprocess
 from zipfile import ZipFile
 
 
+def del_rw(operation, name, exc): 
+    os.chmod(name, stat.S_IWRITE)
+    os.remove(name)
+    return True
+    
+
 class MakeEnv:
     def __init__(self):
         self.build_dir = os.path.join(os.getcwd(), 'build')
         self.dist_dir = os.path.join(os.getcwd(), 'dist')
         self.work_dir = os.path.join(os.getcwd(), 'build', 'work')
-        self.spec_dir = os.path.join(os.getcwd(), 'build', 'spec')
 
     def check_directory(self):
-        if os.path.exists(self.build_dir):
-            shutil.rmtree(self.build_dir)
-        if os.path.exists(self.dist_dir):
-            shutil.rmtree(self.dist_dir)
+        try:
+            if os.path.exists(self.build_dir):
+                shutil.rmtree(self.build_dir, onerror=del_rw)
+            if os.path.exists(self.dist_dir):
+                shutil.rmtree(self.dist_dir, onerror=del_rw)
+        except:
+            print("Please delete the 'build/' directory, because we aren't able to delete it due to access errors.")
+            print("Press any key to try again .  .  .")
+            os.system('pause>nul')
+            self.check_directory()
+            return
+        print(sys.version)
         os.mkdir(self.build_dir)
         os.mkdir(self.dist_dir)
         os.mkdir(self.work_dir)
-        os.mkdir(self.spec_dir)
 
 
 class Build(MakeEnv):
@@ -29,16 +43,29 @@ class Build(MakeEnv):
     def __init__(self):
         super().__init__()
         self.pyzbar_location = os.path.join(os.getenv("LOCALAPPDATA"), "Programs", "Python",
-                                            "Python311", "Lib", "site-packages", "pyzbar")
+                                            f"Python{sys.version_info[0]}{sys.version_info[1]}", "Lib", "site-packages", "pyzbar")
+        self.pyzbar_location_32 = os.path.join(os.getenv("LOCALAPPDATA"), "Programs", "Python",
+                                               f"Python{sys.version_info[0]}{sys.version_info[1]}-32", "Lib", "site-packages", "pyzbar")
+        self.is_64_bit = sys.maxsize > 2**32
         self.check_directory()
 
     def get_pyzbar(self):
-        if not os.path.exists(self.pyzbar_location):
-            raise FileNotFoundError("Pyzbar with Python 3.11 must be installed in order to continue with installation.")
-        shutil.copytree(self.pyzbar_location, self.build_dir+"\\pyzbar")
+        if self.is_64_bit:
+            if not os.path.exists(self.pyzbar_location):
+                raise FileNotFoundError("Pyzbar with Python must be installed in order to continue with installation.")
+            else:
+                shutil.copytree(self.pyzbar_location, self.build_dir+"\\pyzbar")
+        else:
+            if not os.path.exists(self.pyzbar_location_32):
+                raise FileNotFoundError("Pyzbar with Python must be installed in order to continue with installation.")
+            else:
+                shutil.copytree(self.pyzbar_location_32, self.build_dir+"\\pyzbar")
 
     def get_pyinstaller(self):
-        pyinstaller_version = "v5.12.0"
+        response = requests.get("https://api.github.com/repos/pyinstaller/pyinstaller/releases/latest")
+        latest_version_data = response.json()
+        
+        pyinstaller_version = latest_version_data['tag_name']
 
         if self.pyinstaller_version == pyinstaller_version[1:]:
             return
@@ -66,12 +93,22 @@ class Build(MakeEnv):
         subprocess.run(['pip', 'install', pyinstaller_dir], cwd=self.build_dir)
 
     def get_src(self):
-        github_qrcode_utility = "https://github.com/srpcdgaming12/qrcode-utility.git"
+        github_qrcode_utility = "https://github.com/srpcd/qrcode-utility.git"
         subprocess.run(['git', 'clone', github_qrcode_utility], cwd=self.build_dir)
         shutil.copytree(f"{self.build_dir}\\qrcode-utility\\src", os.path.join(self.build_dir, 'src'))
+        shutil.rmtree(f"{self.build_dir}\\qrcode-utility", onerror=del_rw)
+        # subprocess.run(["rmdir", "/Q", "/S", f"{self.build_dir}\\qrcode-utility"])  # reason I don't use shutil.rmtree is because of access denied due to a readonly issue  # this is fixed!!
 
     def get_upx(self):
-        upx_path = "https://github.com/upx/upx/releases/download/v4.0.2/upx-4.0.2-win64.zip"
+        response = requests.get("https://api.github.com/repos/upx/upx/releases/latest")
+        latest_version_data = response.json()
+        
+        if self.is_64_bit:
+            upx_path = latest_version_data['assets'][12]['browser_download_url']
+        else:
+            upx_path = latest_version_data['assets'][11]['browser_download_url']
+        upx_version = latest_version_data['tag_name'][1:]
+        #upx_path = f"https://github.com/upx/upx/releases/download/{upx_version}/upx-{upx_version}-win64.zip"
 
         with requests.get(upx_path, stream=True) as upx_get:
             upx_get.raise_for_status()
@@ -79,18 +116,16 @@ class Build(MakeEnv):
                 shutil.copyfileobj(upx_get.raw, upx_dest)
 
         shutil.unpack_archive(os.path.join(self.build_dir, 'upx.zip'), self.build_dir)
-        os.rename(os.path.join(self.build_dir, 'upx-4.0.2-win64'), os.path.join(self.build_dir, 'upx'))
+        os.rename(os.path.join(self.build_dir, f'upx-{upx_version}-win{"64" if self.is_64_bit else "32"}'), os.path.join(self.build_dir, 'upx'))
+        os.remove(os.path.join(self.build_dir, 'upx.zip'))
 
     def compile(self):
         self.get_pyzbar()
         self.get_src()
         self.get_pyinstaller()
         self.get_upx()
-        command = ['pyinstaller', '--onefile', '--windowed', '--icon', '..\\src\\icons\\qrcode_gen_icon.ico',
-                   '--workpath', f'"{self.work_dir}"', '--distpath', f'"{self.dist_dir}"', '--specpath', 
-                   f'"{self.spec_dir}"', '--upx-dir', 'build\\upx', '--add-data', '..\\src\\icons;icons',  
-                   '--add-data', '..\\pyzbar;pyzbar', '--disable-windowed-traceback', '--clean', 
-                   'build\\src\\main.py']
+        command = ['pyinstaller', '--workpath', f'"{self.work_dir}"', '--distpath', f'"{self.dist_dir}"', 
+                   '--upx-dir', 'build\\upx', '--log-level=DEBUG', '--clean', f'{self.build_dir}\\src\\metadata\\main.spec']
         subprocess.run(' '.join(command))
 
         return self
