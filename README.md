@@ -1,14 +1,14 @@
 <div align="center">
 	<img src="img/qrcode_utility_banner.png", style="border-radius: 15px; display: block; margin-left: auto; margin-right: auto; margin-bottom: 20px;", alt="Window look">
 		<p>Easy to use graphical user interface and install for managing various types of barcodes.</p>
-		<img src="https://img.shields.io/github/languages/top/srpcdgaming12/qrcode-utility?color=%23000000">
-		<img src="https://img.shields.io/github/stars/srpcdgaming12/qrcode-utility?color=%23000000&logoColor=%23000000">
+		<img src="https://img.shields.io/github/languages/top/srpcd/qrcode-utility?color=%23000000">
+		<img src="https://img.shields.io/github/stars/srpcd/qrcode-utility?color=%23000000&logoColor=%23000000">
 		<br>
-		<img src="https://img.shields.io/github/commit-activity/w/srpcdgaming12/qrcode-utility?color=%23000000"> 
-		<img src="https://img.shields.io/github/last-commit/srpcdgaming12/qrcode-utility?color=%23000000&logoColor=%23000000">
+		<img src="https://img.shields.io/github/commit-activity/w/srpcd/qrcode-utility?color=%23000000"> 
+		<img src="https://img.shields.io/github/last-commit/srpcd/qrcode-utility?color=%23000000&logoColor=%23000000">
 	<br>
-    <img src="https://img.shields.io/github/issues/srpcdgaming12/qrcode-utility?color=%23000000&logoColor=%23000000">
-    <img src="https://img.shields.io/github/issues-closed/srpcdgaming12/qrcode-utility?color=%23000000&logoColor=%23000000">
+    <img src="https://img.shields.io/github/issues/srpcd/qrcode-utility?color=%23000000&logoColor=%23000000">
+    <img src="https://img.shields.io/github/issues-closed/srpcd/qrcode-utility?color=%23000000&logoColor=%23000000">
     <br>
 </div>
 
