@@ -17,9 +17,8 @@ class QRCodeUtility(tk.Tk):
         self.title("QRCode Utility")
         self.resizable(False, False)
         self.config(bg='#222222')
-        # sys.exit(0) if not hasattr(sys, "_MEIPASS") else None
-        # self.iconbitmap(f"{sys._MEIPASS}\\icons\\qrcode_gen_icon.ico")
-        self.iconbitmap(f"icons\\qrcode_gen_icon.ico")
+        sys.exit(0) if not hasattr(sys, "_MEIPASS") else None
+        self.iconbitmap(f"{sys._MEIPASS}\\icons\\qrcode_gen_icon.ico")
         self.responsive = QRCodeUnresponsive(self)
         self.qr_photo_image = self.resized_image = self.prev_image = self.decoded_data = None
         self.blank_image = Image.new("RGB", (160, 160), "white")
