@@ -5,7 +5,7 @@ a = Analysis(
     ['..\\main.py'],
     pathex=[],
     binaries=[],
-    datas=[('..\\..\\build\\src\\icons', 'icons'), ('..\\..\\build\\pyzbar', 'pyzbar')],
+    datas=[('..\\icons', 'icons'), ('..\\..\\pyzbar', 'pyzbar')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
