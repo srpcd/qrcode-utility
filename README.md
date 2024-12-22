@@ -16,27 +16,12 @@
    - QRCode Utility is licensed through <a href="https://mit-license.org/">MIT License</a>.
 
 <br>
-
 # Announcements
-   ### Version v1.00
-   - Added Generating QRCodes
-   - Added Saving QRCodes
-   - Added Opening QRCodes
-   - Added Scanning QRCodes
-   - Added About Window
-
-<br>
-
-# Features
-   - Generating QRCodes
-
-     - Saving QRCodes
-     - Fast Opening QRCodes
-      
-   - Scanning QRCodes
-     - Reading QRCodes
-     - OpenCV Support
-
+   ### Version v1.10
+   - Added Scan Button on Generator:
+   	- Scanning after Generating QRCodes
+   - Added Delete Button on Scanner:
+   	- Empties the Scanner
 <br>
 
 # Install
