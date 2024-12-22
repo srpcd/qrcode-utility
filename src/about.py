@@ -19,7 +19,7 @@ def about_window(master, icon, *args, **kwargs):
 class AboutWindow(tk.Toplevel):
     """
     QRCode Utility - srpcd
-    Version v1.00
+    Version v1.10
     
     Barcode Scanner: {bar_name}
     """
