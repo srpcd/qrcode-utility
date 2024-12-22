@@ -1,5 +1,7 @@
 import tkinter as tk
 import qrcode
+import random
+import string
 import about
 import sys
 import os
@@ -15,8 +17,9 @@ class QRCodeUtility(tk.Tk):
         self.title("QRCode Utility")
         self.resizable(False, False)
         self.config(bg='#222222')
-        sys.exit(0) if not hasattr(sys, "_MEIPASS") else None
-        self.iconbitmap(f"{sys._MEIPASS}\\icons\\qrcode_gen_icon.ico")
+        # sys.exit(0) if not hasattr(sys, "_MEIPASS") else None
+        # self.iconbitmap(f"{sys._MEIPASS}\\icons\\qrcode_gen_icon.ico")
+        self.iconbitmap(f"icons\\qrcode_gen_icon.ico")
         self.responsive = QRCodeUnresponsive(self)
         self.qr_photo_image = self.resized_image = self.prev_image = self.decoded_data = None
         self.blank_image = Image.new("RGB", (160, 160), "white")
@@ -45,6 +48,7 @@ class QRCodeUtility(tk.Tk):
         self.generator_menu.add_command(label="Save", command=self.save)
         self.generator_menu.add_command(label="Delete", command=self.delete)
         self.generator_menu.add_command(label="Show", command=self.show)
+        self.generator_menu.add_command(label="Scan", command=self.scan)
         self.generator_menu.add_separator()
         self.generator_menu.add_command(label="Exit", command=self.destroy)
         
@@ -77,7 +81,7 @@ class QRCodeUtility(tk.Tk):
         self.bind("<Alt_L>", lambda e: (self.generator_menu.post(self.winfo_x()+8, self.winfo_y()+55)))
         
         self.generator = tk.LabelFrame(self, bg='#222222', text='Generator', fg='white')
-        self.generator.pack(padx=25, pady=15)
+        self.generator.pack(padx=25, pady=15, fill='x')
         self.gen_label = tk.Label(self.generator, bg='SystemButtonFace', image=self.blank_image, bd=0)
         self.gen_label.grid(row=3, column=0, padx=25, pady=25, rowspan=7, sticky='w')
         self.gen_entry = tk.Entry(self.generator, width=31, font=('Helvetica', 11), background='black', fg='white',
@@ -96,21 +100,34 @@ class QRCodeUtility(tk.Tk):
         self.show_button = tk.Button(self.generator, text='Open', command=self.show, padx=9, pady=3, bg='black',
                                      fg='white', activebackground='#353535', activeforeground='white', relief=tk.SUNKEN,
                                      bd=0)
+        self.scan_button = tk.Button(self.generator, text='Scan', command=self.scan, padx=11, pady=3, bg='black',
+                                     fg='white', activebackground='#353535', activeforeground='white', relief=tk.SUNKEN,
+                                     bd=0)
         self.save_button.grid(row=3, column=0, padx=25, pady=(25, 0), columnspan=2, sticky='e')
         self.del_button.grid(row=4, column=0, padx=25, columnspan=2, sticky='e')
         self.show_button.grid(row=5, column=0, padx=25, columnspan=2, sticky='e')
+        self.scan_button.grid(row=6, column=0, padx=25, columnspan=2, sticky='e')
         
         self.scanner = tk.LabelFrame(self, bg='#222222', text='Scanner', fg='white')
-        self.scanner.pack(padx=25, pady=(0, 25))
+        self.scanner.pack(padx=25, pady=(0, 25), fill='x')
 
-        self.open_file = tk.Button(self.scanner, text='Open File', command=self.open_image, padx=5, pady=3, bg='black',
+        self.open_file = tk.Button(self.scanner, text='Open', command=self.open_image, padx=5, pady=3, bg='black',
                                    fg='white', activebackground='#353535', activeforeground='white', relief=tk.SUNKEN,
                                    bd=0)
-        self.open_file.grid(row=0, column=0, pady=(0, 0), sticky='w', padx=15)
+        self.open_file.grid(row=0, column=0, pady=(0, 0), sticky='w', padx=(15, 0))
+        
+        self.delete_image = Image.open(f"{getattr(sys, '_MEIPASS', os.getcwd())}\\icons\\delete.png")
+        self.delete_icon = ImageTk.PhotoImage(self.delete_image.resize((13, 13)))
+
+        self.delete_file_path = tk.Button(self.scanner, image=self.delete_icon, padx=8, pady=8, width=23, height=23,
+                                          bg='black', fg='white', activebackground='black', activeforeground='white',
+                                          relief=tk.SUNKEN, bd=0, command=self.delete_scan)
+        self.delete_file_path.grid(row=0, column=1, padx=(8, 11), sticky='w')
+        
         self.preview_file_path = tk.Entry(self.scanner, width=22, font=('Helvetica', 11), background='black',
                                           foreground='white', bd=0, relief=tk.SUNKEN, disabledbackground='black',
                                           disabledforeground='white', state=tk.DISABLED, insertbackground="white")
-        self.preview_file_path.grid(row=0, column=1, pady=15, sticky='e')
+        self.preview_file_path.grid(row=0, column=2, pady=15, sticky='e')
         self.preview_file_path.bind("<Return>", lambda e: self.fast_enter())
 
         self.edit_image = Image.open(f"{getattr(sys, '_MEIPASS', os.getcwd())}\\icons\\edit.png")
@@ -119,7 +136,7 @@ class QRCodeUtility(tk.Tk):
         self.edit_file_path = tk.Button(self.scanner, image=self.edit_icon, padx=8, pady=8, width=23, height=23,
                                         bg='black', fg='white', activebackground='black', activeforeground='white',
                                         relief=tk.SUNKEN, bd=0, command=self.show_user_path)
-        self.edit_file_path.grid(row=0, column=2, sticky='e', padx=(14, 8))
+        self.edit_file_path.grid(row=0, column=3, sticky='e', padx=(11, 8))
 
         self.conv_image = Image.open(f"{getattr(sys, '_MEIPASS', os.getcwd())}\\icons\\convert.png")
         self.conv_icon = ImageTk.PhotoImage(self.conv_image.resize((13, 13)))
@@ -127,10 +144,10 @@ class QRCodeUtility(tk.Tk):
         self.conv_file_path = tk.Button(self.scanner, image=self.conv_icon, padx=8, pady=8, width=23, height=23,
                                         bg='black', fg='white', activebackground='#353535', activeforeground='white',
                                         relief=tk.SUNKEN, bd=0, command=self.edit_directory)
-        self.conv_file_path.grid(row=0, column=3, padx=(0, 20))
+        self.conv_file_path.grid(row=0, column=4, padx=(0, 20))
 
         self.qr_text_frame = tk.Frame(self.scanner, bg='#222222')
-        self.qr_text_frame.grid(row=1, column=0, columnspan=2, padx=15, pady=20, sticky='w')
+        self.qr_text_frame.grid(row=1, column=0, columnspan=4, padx=15, pady=20, sticky='w')
         self.qrcode_text = tk.Text(self.qr_text_frame, width=20, height=8, background='black', state='disabled',
                                    foreground='white', bd=0, relief=tk.SUNKEN)
         self.qrcode_text.pack(side=tk.LEFT)
@@ -142,7 +159,7 @@ class QRCodeUtility(tk.Tk):
         self.prev_example = Image.new("RGB", (130, 130), "white")
         self.prev_example = ImageTk.PhotoImage(self.prev_example)
         self.preview_qr_read = tk.Label(self.scanner, image=self.prev_example)
-        self.preview_qr_read.grid(row=1, column=1, sticky='e', padx=(20, 14), columnspan=3)
+        self.preview_qr_read.grid(row=1, column=1, sticky='e', padx=(10, 20), columnspan=4)
         
         self.delete()
 
@@ -168,6 +185,7 @@ class QRCodeUtility(tk.Tk):
         self.save_button.config(state=tk.NORMAL)
         self.del_button.config(state=tk.NORMAL)
         self.show_button.config(state=tk.NORMAL)
+        self.scan_button.config(state=tk.NORMAL)
         website_url = self.gen_entry.get()
         qr_code_size = 160
         qr_image = self.generate_custom_qrcode(website_url, qr_code_size)
@@ -184,6 +202,7 @@ class QRCodeUtility(tk.Tk):
         self.generator_menu.add_command(label="Save", command=self.save)
         self.generator_menu.add_command(label="Delete", command=self.delete)
         self.generator_menu.add_command(label="Show", command=self.show)
+        self.generator_menu.add_command(label="Scan", command=self.scan)
         self.generator_menu.add_separator()
         self.generator_menu.add_command(label="Exit", command=self.destroy)
 
@@ -250,16 +269,30 @@ class QRCodeUtility(tk.Tk):
     def show(self):
         show_img = OpenImage(self.resized_image)
         show_img.start()
+        
+    def scan(self):
+        if self.current_mode.get():
+            self.scanner_menu.invoke("Edit Mode")
+            
+        try:
+            self.start_scanning(use_file_path=False)
+        except Exception as e:
+            if str(e) != "return":
+                messagebox.showerror(message=f"An error occurred. Path doesn't exist.", title="Error")
+            del e
+        else:
+            self.preview_qr_read.config(image=self.prev_image)
 
     def delete(self):
         self.gen_label.config(image=self.blank_image, state=tk.DISABLED)
         self.gen_entry.delete(0, tk.END)
 
-        self.generator_menu.delete(5)
+        self.generator_menu.delete(6)
         self.generator_menu.delete(1)
         self.generator_menu.delete("Save")
         self.generator_menu.delete("Delete")
         self.generator_menu.delete("Show")
+        self.generator_menu.delete("Scan")
         self.generator_menu.delete("Exit")
 
         self.generator_menu.add_separator()
@@ -268,6 +301,7 @@ class QRCodeUtility(tk.Tk):
         self.save_button.config(state=tk.DISABLED)
         self.del_button.config(state=tk.DISABLED)
         self.show_button.config(state=tk.DISABLED)
+        self.scan_button.config(state=tk.DISABLED)
 
     def delete_scan(self):
         self.preview_file_path.config(state=tk.NORMAL)
@@ -291,36 +325,77 @@ class QRCodeUtility(tk.Tk):
             else:
                 self.preview_qr_read.config(image=self.prev_image)
     
-    def start_scanning(self, file_path):
-        self.loaded_file_path = file_path
-        private_file_path = str(file_path[:])
+    def start_scanning(self, file_path=None, use_file_path=True):
+        if use_file_path:
+            self.loaded_file_path = file_path
+            private_file_path = str(file_path[:])
 
-        if private_file_path[1:].startswith(':/Users/') or private_file_path[1:].startswith(':\\Users\\'):
-            for index, letter in enumerate(file_path[9:]):
-                if letter in ('/', '\\'):
-                    break
-                private_file_path = private_file_path[:9 + index] + '*' + private_file_path[9 + index + 1:]
+            if private_file_path[1:].startswith(':/Users/') or private_file_path[1:].startswith(':\\Users\\'):
+                for index, letter in enumerate(file_path[9:]):
+                    if letter in ('/', '\\'):
+                        break
+                    private_file_path = private_file_path[:9 + index] + '*' + private_file_path[9 + index + 1:]
 
-        self.preview_file_path.config(state=tk.NORMAL)
-        self.preview_file_path.delete(0, tk.END)
-        self.preview_file_path.insert(0, private_file_path)
-        self.preview_file_path.config(state=tk.DISABLED)
+            self.preview_file_path.config(state=tk.NORMAL)
+            self.preview_file_path.delete(0, tk.END)
+            self.preview_file_path.insert(0, private_file_path)
+            self.preview_file_path.config(state=tk.DISABLED)
 
-        try:
-            file_path.encode('ascii')
-        except UnicodeEncodeError:
-            messagebox.showerror(message=f"\"{file_path}\" contains some characters that are not supported "
-                                         f"by this application.", title="Error")
-            return
+            try:
+                file_path.encode('ascii')
+            except UnicodeEncodeError:
+                messagebox.showerror(message=f"\"{file_path}\" contains some characters that are not supported "
+                                             f"by this application.", title="Error")
+                return
 
-        if len(file_path) <= 0:
-            messagebox.showerror(message=f"Please enter a file path, or use the open button to select a file path.",
-                                 title="Error")
-            raise SyntaxError('return')
+            if len(file_path) <= 0:
+                messagebox.showerror(message=f"Please enter a file path, or use the open button to select a file path.",
+                                     title="Error")
+                raise SyntaxError('return')
             
-        self.prev_image = ImageTk.PhotoImage(Image.open(file_path).resize((130, 130)))
+            self.prev_image = ImageTk.PhotoImage(Image.open(file_path).resize((130, 130)))
         
-        read_image = cv2.imread(file_path)
+            read_image = cv2.imread(file_path)
+        else:
+            temp_path = os.getenv('TEMP')
+            if temp_path is None:
+                messagebox.showerror(message=f"We can't scan this without a temporary folder environment variable. Please try again later.", title="Error")
+                raise SyntaxError('return')
+            
+            qrcode_temp_path = os.path.join(temp_path, ''.join(random.choices(string.ascii_letters + string.digits, k=16))+'.png')
+            
+            self.resized_image.save(qrcode_temp_path)
+            
+            self.loaded_file_path = qrcode_temp_path
+            private_file_path = str(qrcode_temp_path[:])
+
+            if private_file_path[1:].startswith(':/Users/') or private_file_path[1:].startswith(':\\Users\\'):
+                for index, letter in enumerate(qrcode_temp_path[9:]):
+                    if letter in ('/', '\\'):
+                        break
+                    private_file_path = private_file_path[:9 + index] + '*' + private_file_path[9 + index + 1:]
+
+            self.preview_file_path.config(state=tk.NORMAL)
+            self.preview_file_path.delete(0, tk.END)
+            self.preview_file_path.insert(0, private_file_path)
+            self.preview_file_path.config(state=tk.DISABLED)
+
+            try:
+                qrcode_temp_path.encode('ascii')
+            except UnicodeEncodeError:
+                messagebox.showerror(message=f"\"{qrcode_temp_path}\" contains some characters that are not supported "
+                                             f"by this application.", title="Error")
+                return
+                
+            if len(qrcode_temp_path) <= 0:
+                messagebox.showerror(message=f"Please enter a file path, or use the open button to select a file path.",
+                                     title="Error")
+                raise SyntaxError('return')
+            
+            self.prev_image = ImageTk.PhotoImage(Image.open(qrcode_temp_path).resize((130, 130)))
+        
+            read_image = cv2.imread(qrcode_temp_path)
+            
         decoded_data = decode_qr_code(read_image)
         if not decoded_data and not messagebox.askyesno(message="This image is decoded empty. Would you "
                                                                 "like to continue?", title='Empty QRCode',
