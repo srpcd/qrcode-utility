@@ -81,7 +81,7 @@ class QRCodeUtility(tk.Tk):
         self.gen_label = tk.Label(self.generator, bg='SystemButtonFace', image=self.blank_image, bd=0)
         self.gen_label.grid(row=3, column=0, padx=25, pady=25, rowspan=7, sticky='w')
         self.gen_entry = tk.Entry(self.generator, width=31, font=('Helvetica', 11), background='black', fg='white',
-                                  bd=0, relief=tk.SUNKEN)
+                                  bd=0, relief=tk.SUNKEN, insertbackground="white")
         self.gen_entry.grid(row=2, column=0, pady=(15, 0), padx=15)
         self.gen_button = tk.Button(self.generator, text='Generate', command=self.change_image, bg='black', fg='white',
                                     padx=11, pady=3, activebackground='#353535', activeforeground='white',
@@ -109,7 +109,7 @@ class QRCodeUtility(tk.Tk):
         self.open_file.grid(row=0, column=0, pady=(0, 0), sticky='w', padx=15)
         self.preview_file_path = tk.Entry(self.scanner, width=22, font=('Helvetica', 11), background='black',
                                           foreground='white', bd=0, relief=tk.SUNKEN, disabledbackground='black',
-                                          disabledforeground='white', state=tk.DISABLED)
+                                          disabledforeground='white', state=tk.DISABLED, insertbackground="white")
         self.preview_file_path.grid(row=0, column=1, pady=15, sticky='e')
         self.preview_file_path.bind("<Return>", lambda e: self.fast_enter())
 
