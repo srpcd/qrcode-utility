@@ -16,12 +16,14 @@
    - QRCode Utility is licensed through <a href="https://mit-license.org/">MIT License</a>.
 
 <br>
+
 # Announcements
    ### Version v1.10
    - Added Scan Button on Generator:
-   	- Scanning after Generating QRCodes
+     - Scanning after Generating QRCodes
    - Added Delete Button on Scanner:
-   	- Empties the Scanner
+     - Empties the Scanner
+     
 <br>
 
 # Install
